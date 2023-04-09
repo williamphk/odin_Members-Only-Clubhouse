@@ -1,4 +1,5 @@
 const Post = require("../models/post");
+const User = require("../models/user");
 
 const { body, validationResult } = require("express-validator");
 
@@ -8,7 +9,18 @@ exports.post_list = async (req, res, next) => {
     const post_list = await Post.find({}, "title").sort({
       title: 1,
     });
-    res.render("post_list", { title: "Post List", post_list });
+    if (req.isAuthenticated()) {
+      res.render("post_list", {
+        title: "Post List",
+        user: req.user.fullname,
+        post_list,
+      });
+    } else {
+      res.render("post_list", {
+        title: "Post List",
+        post_list,
+      });
+    }
   } catch (err) {
     return next(err);
   }
@@ -17,11 +29,25 @@ exports.post_list = async (req, res, next) => {
 // Display detail page for a specific Post
 exports.post_detail = async (req, res, next) => {
   try {
-    const post_detail = await Post.findById(req.params.id);
-    res.render("post_detail", {
-      title: "Post Detail",
-      post_detail,
-    });
+    const post_detail = await Post.findById(req.params.id).populate(
+      "created_by"
+    );
+    if (req.isAuthenticated()) {
+      res.render("post_detail", {
+        title: "Post Detail",
+        post_detail,
+      });
+    } else {
+      const limitedPostDetail = {
+        title: post_detail.title,
+        content: post_detail.content,
+        created_by: "",
+      };
+      res.render("post_detail", {
+        title: "Post Detail",
+        post_detail: limitedPostDetail,
+      });
+    }
   } catch (err) {
     return next(err);
   }
@@ -50,8 +76,11 @@ exports.post_create_post = [
       title: req.body.title,
       content: req.body.content,
       timestamp: new Date(),
-      //created_by: "643207e7dda8a255ab8ea4c3",
     });
+
+    if (req.isAuthenticated()) {
+      post.created_by = req.user._id;
+    }
 
     if (!errors.isEmpty()) {
       res.render("post_form", { post, errors: errors.array() });
@@ -129,10 +158,12 @@ exports.post_update_post = [
       title: req.body.title,
       content: req.body.content,
       timestamp: new Date(),
-      //created_by: req.params.id,
       _id: req.params.id,
     });
-    console.log("success");
+
+    if (req.isAuthenticated()) {
+      post.created_by = req.user._id;
+    }
 
     if (!errors.isEmpty()) {
       res.render("post_form", { title: "Update Post", post });

@@ -2,7 +2,8 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  if (user)
+    p Hello #{user}
 
   ul
     each post in post_list
@@ -11,3 +12,7 @@ block content
 
     else
       li There are no posts.
+  if (user)
+    hr
+    p
+      a(href='/posts/create') Create new post

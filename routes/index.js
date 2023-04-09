@@ -18,9 +18,7 @@ router.get("/admin-route", isAdmin, (req, res, next) => {
 });
 
 router.get("/login-success", (req, res, next) => {
-  res.send(
-    '<p>You successfully logged in. --> <a href="/protected-route">Go to protected route</a></p>'
-  );
+  res.redirect("/posts");
 });
 
 router.get("/login-failure", (req, res, next) => {

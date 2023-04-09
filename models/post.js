@@ -6,7 +6,7 @@ const PostSchema = new Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
   timestamp: { type: Date },
-  //created_by: { type: Schema.Types.ObjectId, ref: "User" },
+  created_by: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
 PostSchema.virtual("url").get(function () {
