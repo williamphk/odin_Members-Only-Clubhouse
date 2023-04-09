@@ -37,14 +37,17 @@ const strategy = new LocalStrategy(
 
 passport.use(strategy);
 
-passport.serializeUser((user, done) => {
+// Serialize the user for session storage
+passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
 
-passport.deserializeUser((userId, done) => {
-  User.findById(userId)
-    .then((user) => {
-      done(null, user);
-    })
-    .catch((err) => done(err));
+// Deserialize the user from session storage
+passport.deserializeUser(async function (id, done) {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
 });

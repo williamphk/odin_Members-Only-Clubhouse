@@ -237,6 +237,10 @@ exports.user_login_post = passport.authenticate("local", {
 });
 
 exports.user_logout_get = (req, res, next) => {
-  req.logout();
-  res.redirect("/");
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/users/login");
+  });
 };
