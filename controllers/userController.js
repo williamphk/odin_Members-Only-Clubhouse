@@ -1,4 +1,6 @@
 const User = require("../models/user");
+const passport = require("passport");
+const genPassword = require("../lib/passwordUtils").genPassword;
 
 const { body, validationResult } = require("express-validator");
 var bcrypt = require("bcryptjs");
@@ -82,26 +84,29 @@ exports.user_create_post = [
     .escape(),
   async (req, res, next) => {
     const errors = validationResult(req);
+
+    const saltHash = genPassword(req.body.password);
+
+    console.log("saltHash.genHash " + saltHash.genHash);
+
     const user = new User({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       email: req.body.email,
-      password: req.body.password,
+      password: saltHash.genHash,
+      salt: saltHash.salt,
       isAdmin: req.body.isAdmin === "true",
     });
 
     if (!errors.isEmpty()) {
       res.render("user_form", { user, errors: errors.array() });
     }
-    bcrypt.hash(user.password, 10, async (err, hashedPassword) => {
-      user.password = hashedPassword;
-      try {
-        await user.save();
-        res.redirect(user.url);
-      } catch (err) {
-        return next(err);
-      }
-    });
+    try {
+      await user.save();
+      res.redirect(user.url);
+    } catch (err) {
+      return next(err);
+    }
   },
 ];
 
@@ -199,11 +204,18 @@ exports.user_update_post = [
     .escape(),
   async (req, res, next) => {
     const errors = validationResult(req);
+
+    const saltHash = genPassword(req.body.password);
+
+    const salt = saltHash.salt;
+    const password = saltHash.password;
+
     const user = new User({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       email: req.body.email,
-      password: req.body.password,
+      password: password,
+      salt: salt,
       isAdmin: req.body.isAdmin === "true",
       _id: req.params.id,
     });
@@ -212,14 +224,25 @@ exports.user_update_post = [
     if (!errors.isEmpty()) {
       res.render("user_form", { title: "Update User", user });
     }
-    bcrypt.hash(user.password, 10, async (err, hashedPassword) => {
-      user.password = hashedPassword;
-      try {
-        await User.updateOne({ _id: req.params.id }, user);
-        res.redirect(user.url);
-      } catch (err) {
-        return next(err);
-      }
-    });
+    try {
+      await User.updateOne({ _id: req.params.id }, user);
+      res.redirect(user.url);
+    } catch (err) {
+      return next(err);
+    }
   },
 ];
+
+exports.user_login_get = (req, res, next) => {
+  res.render("user_login");
+};
+
+exports.user_login_post = passport.authenticate("local", {
+  failureRedirect: "/login-failure",
+  successRedirect: "/login-success",
+});
+
+exports.user_logout_get = (req, res, next) => {
+  req.logout();
+  res.redirect("/");
+};

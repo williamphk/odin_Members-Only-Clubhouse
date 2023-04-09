@@ -1,5 +1,9 @@
 var createError = require("http-errors");
 var express = require("express");
+const mongoose = require("mongoose");
+const session = require("express-session");
+const passport = require("passport");
+const MongoStore = require("connect-mongo");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
@@ -18,7 +22,6 @@ var postsRouter = require("./routes/posts");
 var app = express();
 
 // Set up mongoose connection
-const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 const mongoDB = `mongodb+srv://inventory-admin:${process.env.SECRET_KEY}@cluster0.ynqmqjk.mongodb.net/clubhouse?retryWrites=true&w=majority`;
 
@@ -26,6 +29,30 @@ main().catch((err) => console.log(err));
 async function main() {
   await mongoose.connect(mongoDB);
 }
+
+app.use(
+  session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: mongoDB }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // Equals 1 day (1 day * 24 hr/1 day * 60 min/1 hr * 60 sec/1 min * 1000 ms / 1 sec)
+    },
+  })
+);
+
+// Need to require the entire Passport config module so app.js knows about it
+require("./config/passport");
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use((req, res, next) => {
+  console.log(req.session);
+  console.log(req.user);
+  next();
+});
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

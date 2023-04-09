@@ -9,6 +9,12 @@ router.get("/create", user_controller.user_create_get);
 // POST request for creating Post
 router.post("/create", user_controller.user_create_post);
 
+router.get("/login", user_controller.user_login_get);
+
+router.post("/login", user_controller.user_login_post);
+
+router.get("/logout", user_controller.user_logout_get);
+
 // GET request to delete Post
 router.get("/:id/delete", user_controller.user_delete_get);
 
