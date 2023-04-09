@@ -1,34 +1,39 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/user");
-const validPassword = require("../lib/passwordUtils").validPassword;
+var bcrypt = require("bcryptjs");
 
 const customFields = {
   usernameField: "email",
   passwordField: "password",
 };
 
-const verifyCallback = (username, password, done) => {
-  User.findOne({ email: username })
-    .then((user) => {
+const strategy = new LocalStrategy(
+  customFields,
+  async (username, password, done) => {
+    try {
+      // Find the user with the provided username
+      const user = await User.findOne({ email: username });
+      // If the user is not found, return with a message
       if (!user) {
-        return done(null, false);
+        return done(null, false, { message: "Incorrect username" });
       }
-      console.log("input password" + password);
-      const isValid = validPassword(password, user.password, user.salt);
 
-      if (isValid) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
-    })
-    .catch((err) => {
-      done(err);
-    });
-};
-
-const strategy = new LocalStrategy(customFields, verifyCallback);
+      // Compare the provided password with the stored hashed password
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (res) {
+          // If the passwords match, log the user in
+          return done(null, user);
+        } else {
+          // If the passwords do not match, return with a message
+          return done(null, false, { message: "Incorrect password" });
+        }
+      });
+    } catch (err) {
+      return done(err);
+    }
+  }
+);
 
 passport.use(strategy);
 
