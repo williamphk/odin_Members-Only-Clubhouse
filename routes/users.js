@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 
+const isUser = require("./authMiddleware").isUser;
+
 const user_controller = require("../controllers/userController");
 
 // GET request for creating a Post. NOTE This must come before routes that display Post (uses id)
@@ -22,10 +24,10 @@ router.get("/:id/delete", user_controller.user_delete_get);
 router.post("/:id/delete", user_controller.user_delete_post);
 
 // GET request to update Post
-router.get("/:id/update", user_controller.user_update_get);
+router.get("/:id/update", isUser, user_controller.user_update_get);
 
 // POST request to update Post
-router.post("/:id/update", user_controller.user_update_post);
+router.post("/:id/update", isUser, user_controller.user_update_post);
 
 // GET request for one Post
 router.get("/:id", user_controller.user_detail);

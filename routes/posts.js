@@ -3,6 +3,7 @@ var router = express.Router();
 
 const isAuth = require("./authMiddleware").isAuth;
 const isAdmin = require("./authMiddleware").isAdmin;
+const isUserPost = require("./authMiddleware").isUserPost;
 
 const post_controller = require("../controllers/postController");
 
@@ -19,10 +20,10 @@ router.get("/:id/delete", isAdmin, post_controller.post_delete_get);
 router.post("/:id/delete", isAdmin, post_controller.post_delete_post);
 
 // GET request to update Post
-router.get("/:id/update", isAuth, post_controller.post_update_get);
+router.get("/:id/update", isUserPost, post_controller.post_update_get);
 
 // POST request to update Post
-router.post("/:id/update", isAuth, post_controller.post_update_post);
+router.post("/:id/update", isUserPost, post_controller.post_update_post);
 
 // GET request for one Post
 router.get("/:id", post_controller.post_detail);

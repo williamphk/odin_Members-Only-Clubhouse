@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Post = require("../models/post");
 const passport = require("passport");
 
 const { body, validationResult } = require("express-validator");
@@ -19,10 +20,15 @@ exports.user_list = async (req, res, next) => {
 // Display detail page for a specific User
 exports.user_detail = async (req, res, next) => {
   try {
-    const user_detail = await User.findById(req.params.id);
+    const [user_detail, post] = await Promise.all([
+      User.findById(req.params.id),
+      Post.find({ created_by: req.params.id }),
+    ]);
+
     res.render("user_detail", {
       title: "User Detail",
       user_detail,
+      post,
     });
   } catch (err) {
     return next(err);
