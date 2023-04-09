@@ -6,8 +6,14 @@ var logger = require("morgan");
 
 require("dotenv").config();
 
+// Import models
+const User = require("./models/user");
+const Post = require("./models/post");
+
+// Import routes
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+var postsRouter = require("./routes/posts");
 
 var app = express();
 
