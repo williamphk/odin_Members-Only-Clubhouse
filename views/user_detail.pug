@@ -1,0 +1,37 @@
+extends layout
+
+block content
+  h1 User: #{user_detail.fullname}
+
+  p #[strong First Name:] #{user_detail.first_name}
+  p #[strong Last Name:] #{user_detail.last_name}
+  p #[strong Email:] #{user_detail.email}
+  p #[strong Password:]
+  p #[strong Membership:] #{user_detail.membership}
+  p #[strong Admin:] #{user_detail.isAdmin}
+
+  hr
+  p
+      a(href=user_detail.url+'/delete') Delete User
+  p
+      a(href=user_detail.url+'/update') Update User
+
+//-   div(style='margin-left:20px;margin-top:20px')
+//-     h4 Copies
+
+//-     each val in book_instances
+//-       hr
+//-       if val.status=='Available'
+//-         p.text-success #{val.status}
+//-       else if val.status=='Maintenance'
+//-         p.text-danger #{val.status}
+//-       else
+//-         p.text-warning #{val.status}
+//-       p #[strong Imprint:] #{val.imprint}
+//-       if val.status!='Available'
+//-         p #[strong Due back:] #{val.due_back_formatted}
+//-       p #[strong Id:] 
+//-         a(href=val.url) #{val._id}
+
+//-     else
+//-       p There are no copies of this book in the library.

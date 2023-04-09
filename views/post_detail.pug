@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 Post: #{post_detail.title}
+
+  p #[strong Title:] #{post_detail.title}
+  p #[strong Content:] #{post_detail.content}
+  p #[strong Timestamp:] #{post_detail.timestamp}
+  p #[strong Created by:]
+
+  hr
+  p
+      a(href=post_detail.url+'/delete') Delete Post
+  p
+      a(href=post_detail.url+'/update') Update Post
